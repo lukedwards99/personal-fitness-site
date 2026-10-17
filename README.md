@@ -1,6 +1,6 @@
 # Luke Edwards — Personal Fitness
 
-Three original website design studies for a certified personal trainer's advice library and personal bodybuilding journal. The existing BDE project informed the idea of a dated, searchable journey archive; no code, writing, or assets were reused from it. All articles, training examples, and journal updates here are sample content for choosing a design.
+A website for Luke Edwards, a certified personal trainer, with practical training advice and a personal bodybuilding journal. The selected Split design gives both sections equal space: Training on paper and Journal on graphite. All articles, training examples, and journal updates are labeled sample content; stock photographs do not depict Luke.
 
 ## Run locally
 
@@ -11,13 +11,14 @@ npm install
 npm run dev
 ```
 
-Open **http://localhost:5178**. The home page presents the three designs. `npm run dev` applies local D1 migrations and seeds the shared sample content before starting Vite. `npm run dev:server` starts only the server after the database is initialized. No cloud credentials are needed.
+Open **http://localhost:5178**. The home page opens directly into the Split site, with Training and Journal as its two entry points. `npm run dev` applies local D1 migrations and seeds the sample content before starting Vite. `npm run dev:server` starts only the server after the database is initialized. No cloud credentials are needed.
 
-- `/editorial` — a warm, editorial direction on one long page.
-- `/split` — a minimal direction where the home page is two doors: Training and Journal (`/split/training`, `/split/journal`).
-- `/logbook` — a minimal, text-first index with a Training | Journal switch (`/logbook/training`, `/logbook/journal`).
+- `/` — Training and Journal, side by side on desktop and stacked on phones.
+- `/training` — advice and workouts, filtered by category.
+- `/journal` — chronological entries with full-text search.
+- `/post/:slug` — individual training articles and journal entries.
 
-Each design has advice and journal sections, plus individual articles at `/{design}/post/{slug}`. Earlier drafts of the retired Fieldnotes and Iron directions are kept, ignored by Git, in `.local-review/archive-2026-10-17/`.
+Existing `/split`, `/split/training`, `/split/journal`, and `/split/post/:slug` links redirect to their canonical paths. Retired design routes use the site's normal not-found page.
 
 ```sh
 npm run check           # TypeScript and production build
@@ -38,14 +39,13 @@ This starts or reuses the loopback server on port 5178 and serves it through **T
 
 Current preview (while this Mac and the local server are running):
 
-- Gallery: https://lukes-macbook-pro.tail97dc4.ts.net:8443/
-- Editorial: https://lukes-macbook-pro.tail97dc4.ts.net:8443/editorial
-- Split: https://lukes-macbook-pro.tail97dc4.ts.net:8443/split
-- Logbook: https://lukes-macbook-pro.tail97dc4.ts.net:8443/logbook
+- Home: https://lukes-macbook-pro.tail97dc4.ts.net:8443/
+- Training: https://lukes-macbook-pro.tail97dc4.ts.net:8443/training
+- Journal: https://lukes-macbook-pro.tail97dc4.ts.net:8443/journal
 
 ## Cloudflare deployments
 
-React 18, React Router, TypeScript, Vite, Hono, Cloudflare Workers, and D1 follow the workout SPA's stack and the Copy Shop application's shared Worker/D1 approach. Fonts are bundled locally through Fontsource.
+React 18, React Router, TypeScript, Vite, Hono, Cloudflare Workers, and D1. Inter Tight is bundled locally through Fontsource.
 
 | Git branch | Wrangler environment | Worker and database |
 | --- | --- | --- |
@@ -62,7 +62,7 @@ npm run deploy:main     # Typecheck, build production, migrate production D1, de
 
 Deployment selects the Cloudflare environment at build time, checks the generated Worker configuration, and deploys that exact output. Migrations apply only to the matching lane. Routine deployment never seeds, resets, or deletes posts. For initial sample content only, `npm run db:seed:dev` and `npm run db:seed:main` insert missing samples while preserving existing rows.
 
-The repository is [lukedwards99/personal-fitness-site](https://github.com/lukedwards99/personal-fitness-site). Develop on `dev`; merge reviewed changes into `main` for production. Keep credentials out of Git; local Wrangler authentication supplies manual deployment access.
+The repository is [lukedwards99/personal-fitness-site](https://github.com/lukedwards99/personal-fitness-site). Open feature pull requests against `dev`; merging into `dev` deploys the development lane. Merge reviewed changes from `dev` into `main` for production. Feature branches and their pull requests do not deploy either lane. Keep credentials out of Git; local Wrangler authentication supplies manual deployment access.
 
 Cloudflare Workers Builds deploys on pushes to the matching branch. Each Worker has its own Git trigger and project-named build token; preview branch builds are disabled so other branches cannot deploy either lane. The build image uses `NODE_VERSION=24.15.0`, the repository root `/`, and an empty build command because the deploy script performs both build and deployment:
 
