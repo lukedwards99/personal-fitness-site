@@ -16,7 +16,7 @@ if (process.argv.length !== 3 || !Object.hasOwn(lanes, lane)) {
   const root = fileURLToPath(new URL('../', import.meta.url))
   const { environment, name } = lanes[lane]
   // Workers Builds may override Wrangler's configured Worker name. Reject a
-  // mismatched trigger before it can pair one lane's database with another Worker.
+  // mismatched trigger before it can pair one lane's content bucket with another Worker.
   if (process.env.WRANGLER_CI_OVERRIDE_NAME && process.env.WRANGLER_CI_OVERRIDE_NAME !== name) {
     throw new Error(`Workers Builds targets ${process.env.WRANGLER_CI_OVERRIDE_NAME}, but the ${lane} lane targets ${name}.`)
   }
@@ -27,11 +27,12 @@ if (process.argv.length !== 3 || !Object.hasOwn(lanes, lane)) {
     if (result.status !== 0) process.exit(result.status ?? 1)
   }
 
+  run('scripts/check-content-boundary.mjs', [])
   run('node_modules/typescript/bin/tsc', ['--noEmit'])
   run('node_modules/vite/bin/vite.js', ['build'])
 
   // The Vite plugin records the deployable bundle here. Check its lane before
-  // changing a remote database or publishing, then deploy this exact config.
+  // publishing, then deploy this exact config.
   const redirectPath = resolve(root, '.wrangler/deploy/config.json')
   const redirect = JSON.parse(readFileSync(redirectPath, 'utf8'))
   if (typeof redirect.configPath !== 'string') throw new Error('Build did not produce a deploy configuration.')
@@ -39,14 +40,13 @@ if (process.argv.length !== 3 || !Object.hasOwn(lanes, lane)) {
   const outputPath = relative(resolve(root, 'dist'), deployConfigPath)
   if (outputPath.startsWith('..') || outputPath.startsWith('/')) throw new Error('Deploy configuration must be inside dist/.')
   const config = JSON.parse(readFileSync(deployConfigPath, 'utf8'))
-  const database = config.d1_databases?.find((binding) => binding.binding === 'DB')
-  if (config.name !== name || config.vars?.APP_ENV !== environment || database?.database_name !== name) {
+  const bucket = config.r2_buckets?.find((binding) => binding.binding === 'CONTENT')
+  const expectedBucket = `personal-fitness-content-${environment}`
+  if (config.name !== name || config.vars?.APP_ENV !== environment || bucket?.bucket_name !== expectedBucket) {
     throw new Error(`Build configuration does not match the ${lane} lane.`)
   }
 
-  // An explicit root config bypasses Vite's generated-config redirect. D1 then
-  // resolves the selected environment and migrations relative to the source.
-  run('node_modules/wrangler/bin/wrangler.js', ['d1', 'migrations', 'apply', 'DB', '--remote', '--env', environment, '--config', resolve(root, 'wrangler.jsonc')])
+  // Deployments never upload, seed, replace, or delete authored content.
   // Generated configs already contain the selected environment; do not pass
   // --env here, which would select a second environment on that flattened file.
   // Wrangler also consults CLOUDFLARE_ENV, so remove it from this child process.

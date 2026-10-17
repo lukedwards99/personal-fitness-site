@@ -505,6 +505,7 @@ html:has(.split.sp-dark),html:has(.split.sp-dark) body,html:has(.reading-split .
   max-width: 560px;
 }
 
+.sp-empty h1,
 .sp-empty h2 {
   font-size: 26px;
   font-weight: 600;
@@ -520,7 +521,8 @@ html:has(.split.sp-dark),html:has(.split.sp-dark) body,html:has(.reading-split .
   color: var(--sp-muted);
 }
 
-.sp-empty button {
+.sp-empty button,
+.sp-empty > a {
   display: inline-flex;
   align-items: center;
   gap: 10px;
@@ -640,6 +642,7 @@ html:has(.split.sp-dark),html:has(.split.sp-dark) body,html:has(.reading-split .
   .sp-empty {
     margin-left: 264px;
   }
+  .sp-empty h1,
   .sp-empty h2 {
     font-size: 32px;
   }
@@ -932,5 +935,182 @@ html:has(.split.sp-dark),html:has(.split.sp-dark) body,html:has(.reading-split .
   }
   .sp-door:hover .sp-door-arrow,.sp-door:active .sp-door-arrow,.sp-lead:hover .sp-lead-more svg,.sp-lead:active .sp-lead-more svg,.sp-empty button:hover svg {
     transform: none;
+  }
+}
+
+/* Runtime content uses the same quiet frames for loading, failures, and empty libraries. */
+.sp-status {
+  min-height: 160px;
+  margin-top: 44px;
+  padding-top: 24px;
+}
+
+.sp-home-status {
+  padding: 24px var(--sp-pad);
+}
+
+.sp-home-status .sp-empty {
+  margin: 0;
+}
+
+.sp-lead.sp-lead-text-only {
+  grid-template-columns: 1fr;
+}
+
+/* Published Markdown follows the article measure and typography. */
+.reading-split .reading-markdown {
+  margin-top: 40px;
+  overflow-wrap: anywhere;
+}
+
+.reading-split .reading-markdown > :first-child {
+  margin-top: 0;
+}
+
+.reading-split .reading-markdown p {
+  margin: 0 0 1.3em;
+}
+
+.reading-split .reading-markdown h2 {
+  margin: 44px 0 14px;
+}
+
+.reading-split .reading-markdown h3,
+.reading-split .reading-markdown h4,
+.reading-split .reading-markdown h5,
+.reading-split .reading-markdown h6 {
+  margin: 32px 0 12px;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -.02em;
+}
+
+.reading-split .reading-markdown a {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.reading-split .reading-markdown ul,
+.reading-split .reading-markdown ol {
+  padding-left: 1.4em;
+  color: var(--sp-body);
+  line-height: 1.75;
+}
+
+.reading-split .reading-markdown li {
+  margin-block: 6px;
+}
+
+.reading-split .reading-markdown li > p {
+  margin-bottom: 12px;
+}
+
+.reading-split .reading-markdown blockquote {
+  margin: 28px 0;
+  border-left: 2px solid var(--rule);
+  padding-left: 18px;
+}
+
+.reading-split .reading-markdown code {
+  border-radius: 2px;
+  padding: 2px 5px;
+  background: var(--soft);
+  font: .85em ui-monospace, monospace;
+}
+
+.reading-split .reading-markdown pre {
+  overflow-x: auto;
+  padding: 18px;
+  background: var(--soft);
+  line-height: 1.6;
+}
+
+.reading-split .reading-markdown pre code {
+  padding: 0;
+  background: none;
+}
+
+.reading-split .reading-markdown hr {
+  margin-block: 36px;
+  border: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.reading-split .reading-markdown table {
+  width: 100%;
+  margin-block: 24px;
+  border-collapse: collapse;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+  text-align: left;
+}
+
+.reading-split .reading-markdown th,
+.reading-split .reading-markdown td {
+  border-bottom: 1px solid var(--rule);
+  padding: 12px 10px;
+}
+
+.reading-split .reading-markdown th {
+  font-weight: 600;
+}
+
+.reading-split .reading-markdown img {
+  width: 100%;
+  height: auto;
+}
+
+/* Preserve the original media order and the full photo or video frame. */
+.reading-gallery {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 24px 16px;
+  margin-top: 40px;
+}
+
+.reading-gallery figure:only-child {
+  grid-column: 1 / -1;
+}
+
+.reading-gallery img,
+.reading-gallery video {
+  width: 100%;
+  max-height: 760px;
+  border: 1px solid var(--rule);
+  background: var(--soft);
+  object-fit: contain;
+}
+
+.reading-gallery video {
+  display: block;
+}
+
+.reading-gallery figcaption {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@media(max-width:700px) {
+  .reading-gallery {
+    grid-template-columns: 1fr;
+  }
+
+  .reading-split .reading-markdown table {
+    font-size: 14px;
+  }
+}
+
+@media print {
+  .reading-gallery {
+    display: block;
+  }
+
+  .reading-gallery figure {
+    margin-bottom: 24px;
+    break-inside: avoid;
   }
 }

@@ -13,3 +13,17 @@ playwright-report/
 test-results/
 .local-review/
 .impeccable/hook.cache.json
+
+# Authored content belongs in an external workspace, never in this repository.
+/.content/
+/.local-content/
+/content/
+/content-backups/
+/posts/
+/entries/
+/articles/
+/journal/
+/blogs/
+/blog-media/
+.r2*
+.impeccable/config.local.json

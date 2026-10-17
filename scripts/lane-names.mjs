@@ -5,5 +5,5 @@ if (!['dev', 'main'].includes(branch)) {
 } else {
   const environment = branch === 'dev' ? 'dev' : 'production'
   const name = `personal-fitness-${environment}`
-  console.log(JSON.stringify({ branch, environment, worker: name, database: name, provisioned: true }, null, 2))
+  console.log(JSON.stringify({ branch, environment, worker: name, contentBucket: `personal-fitness-content-${environment}`, provisioned: true }, null, 2))
 }
