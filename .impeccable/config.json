@@ -1,1 +1,15 @@
-{"buildPath":"code"}
+{
+  "buildPath": "code",
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-10-17T18:16:30.881Z",
+        "reason": "User selected the existing Split design as the sole site; Inter Tight is part of that established design and is intentionally preserved."
+      }
+    ]
+  }
+}

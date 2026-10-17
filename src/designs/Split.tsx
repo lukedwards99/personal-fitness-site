@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { Link, NavLink, Navigate, useParams } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { advice, journey, formatDate } from '../content';
 import type { Post } from '../content';
@@ -10,7 +10,7 @@ import './split.css';
 // The Split: the site is two halves. Training lives on paper, the journal on graphite,
 // from the home "doors" through each section page to the articles themselves.
 
-const url = (post: Post) => `/split/post/${post.slug}`;
+const url = (post: Post) => `/post/${post.slug}`;
 const count = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 const ALL = 'All';
 const CATEGORIES = [ALL, ...new Set(advice.map(p => p.category))];
@@ -24,10 +24,10 @@ type SectionId = keyof typeof SECTIONS;
 
 function Header() {
   return <header className="sp-header">
-    <Link to="/split" className="sp-brand">Luke Edwards</Link>
+    <Link to="/" className="sp-brand">Luke Edwards</Link>
     <nav className="sp-nav" aria-label="Sections">
-      <NavLink to="/split/training">Training</NavLink>
-      <NavLink to="/split/journal">Journal</NavLink>
+      <NavLink to="/training">Training</NavLink>
+      <NavLink to="/journal">Journal</NavLink>
     </nav>
   </header>;
 }
@@ -43,7 +43,7 @@ function Home() {
       <h1 className="sp-sr">Luke Edwards: training advice and a bodybuilding journal</h1>
       {(Object.keys(SECTIONS) as SectionId[]).map(id => {
         const s = SECTIONS[id];
-        return <Link key={id} to={`/split/${id}`} className={`sp-door sp-${s.tone}`} aria-labelledby={`sp-door-${id}`} aria-describedby={`sp-door-${id}-line sp-door-${id}-latest`}>
+        return <Link key={id} to={`/${id}`} className={`sp-door sp-${s.tone}`} aria-labelledby={`sp-door-${id}`} aria-describedby={`sp-door-${id}-line sp-door-${id}-latest`}>
           <span className="sp-door-head"><h2 className="sp-door-name" id={`sp-door-${id}`}>{s.name}</h2><Arrow className="sp-door-arrow" strokeWidth={1.25}/></span>
           <p className="sp-door-line" id={`sp-door-${id}-line`}>{s.line}</p>
           {s.latest && <p className="sp-door-latest" id={`sp-door-${id}-latest`}><span>Latest</span> <span>{s.latest.title}</span></p>}
@@ -74,7 +74,7 @@ function Training() {
   const list = category === ALL ? advice : advice.filter(p => p.category === category);
   const [lead, ...rest] = list;
   return <>
-    <Intro id="training" note="Sample articles, written for design review."/>
+    <Intro id="training" note="Sample articles. Illustrative advice and workouts."/>
     <div className="sp-filter" role="group" aria-label="Filter articles by category">
       {CATEGORIES.map(c => <button type="button" key={c} aria-pressed={category === c} onClick={() => setCategory(c)}>{c}</button>)}
     </div>
@@ -125,10 +125,8 @@ function Journal() {
   </>;
 }
 
-export default function Split() {
-  const { section } = useParams();
+export default function Split({ section }: { section?: SectionId }) {
   if (section === undefined) return <Home/>;
-  if (section !== 'training' && section !== 'journal') return <Navigate to="/split" replace/>;
   return <div className={`split sp-${SECTIONS[section].tone} sp-page sp-page-${section}`}>
     <Header/>
     <main id="main-content" className="sp-main">{section === 'training' ? <Training/> : <Journal key="journal"/>}</main>
