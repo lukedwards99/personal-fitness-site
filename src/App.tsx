@@ -1,30 +1,44 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import { Check, Copy, ChevronLeft, Share2 } from 'lucide-react';
-import Split from './designs/Split';
-import { posts, advice, journey, formatDate } from './content';
-import type { Post } from './content';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import Split, { ContentStatus, SplitLayout } from './designs/Split';
+import { formatDate } from './content';
+import { useContent } from './content-provider';
 import { Arrow } from './components/Icons';
 
 function ScrollAndTitle() {
   const { pathname, hash } = useLocation();
+  const content = useContent();
+  const path = pathname.replace(/^\/split(?=\/|$)/, '').replace(/\/+$/, '') || '/';
+  const isArticle = path.startsWith('/post/');
+  let slug: string | undefined;
+  try { slug = isArticle ? decodeURIComponent(path.slice('/post/'.length)) : undefined; } catch { /* Malformed paths use the not-found title. */ }
+  const post = content.status === 'ready' ? content.posts.find(item => item.slug === slug) : undefined;
+
   useEffect(() => {
-    const path = pathname.replace(/\/+$/, '') || '/';
-    const slug = path.startsWith('/post/') ? path.slice('/post/'.length) : undefined;
-    const post = posts.find(p => p.slug === slug);
-    const page = post?.title ?? (path === '/training' ? 'Training' : path === '/journal' ? 'Journal' : path === '/' ? '' : 'Page not found');
+    const page = post?.title ?? (path === '/training' ? 'Training' : path === '/journal' ? 'Journal' : path === '/' ? ''
+      : isArticle && content.status === 'loading' ? 'Loading entry' : isArticle && content.status === 'error' ? 'Writing unavailable' : 'Page not found');
     document.title = `${page ? `${page} · ` : ''}Luke Edwards Fitness`;
-    const graphite = path === '/journal' || post?.kind === 'journey';
+    const graphite = path === '/journal' || post?.kind === 'journey' || (isArticle && content.status !== 'ready');
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', graphite ? '#161616' : '#f2f2ee');
+  }, [path, isArticle, post, content.status]);
+
+  useEffect(() => {
+    if (!hash) window.scrollTo(0, 0);
+  }, [pathname, hash]);
+
+  useEffect(() => {
+    if (!hash) return;
     let cancelled = false;
-    if (hash) document.fonts.ready.then(() => {
+    void document.fonts.ready.then(() => {
       if (!cancelled) requestAnimationFrame(() => {
         if (!cancelled) document.getElementById(hash.slice(1))?.scrollIntoView();
       });
     });
-    else window.scrollTo(0, 0);
     return () => { cancelled = true; };
-  }, [pathname, hash]);
+  }, [pathname, hash, content.status]);
   return null;
 }
 
@@ -43,47 +57,51 @@ function ReadingProgress() {
       const max = document.documentElement.scrollHeight - window.innerHeight;
       bar.current?.style.setProperty('--progress', String(max > 0 ? Math.min(1, window.scrollY / max) : 0));
     };
-    const onScroll = () => { if(!frame) frame = requestAnimationFrame(update); };
+    const onChange = () => { if (!frame) frame = requestAnimationFrame(update); };
+    const resize = new ResizeObserver(onChange);
+    resize.observe(document.body);
     update();
-    window.addEventListener('scroll',onScroll,{passive:true});
-    window.addEventListener('resize',onScroll);
-    return () => { cancelAnimationFrame(frame); window.removeEventListener('scroll',onScroll); window.removeEventListener('resize',onScroll); };
-  },[]);
+    window.addEventListener('scroll', onChange, { passive: true });
+    window.addEventListener('resize', onChange);
+    return () => {
+      cancelAnimationFrame(frame);
+      resize.disconnect();
+      window.removeEventListener('scroll', onChange);
+      window.removeEventListener('resize', onChange);
+    };
+  }, []);
   return <div className="reading-progress" ref={bar} aria-hidden="true"/>;
 }
 
 function Article() {
   const { slug } = useParams();
-  const [remotePost,setRemotePost] = useState<Post | null>(null);
-  const [copyState,setCopyState] = useState<'idle'|'copied'|'failed'>('idle');
-  const post = remotePost?.slug === slug ? remotePost : posts.find(p=>p.slug===slug);
-  useEffect(()=>{
-    const controller = new AbortController();
-    setRemotePost(null); setCopyState('idle');
-    fetch(`/api/posts/${encodeURIComponent(slug ?? '')}`,{signal:controller.signal}).then(r=>r.ok?r.json() as Promise<{post: Post}>:null).then(data=>{if(data?.post) setRemotePost(data.post);}).catch(()=>{});
-    return ()=>controller.abort();
-  },[slug]);
-  useEffect(() => {
-    if (!post) return;
-    document.title = `${post.title} · Luke Edwards Fitness`;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', post.kind === 'journey' ? '#161616' : '#f2f2ee');
-  }, [post]);
-  if(!post) return <NotFound/>;
+  const content = useContent();
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
+  useEffect(() => setCopyState('idle'), [slug]);
+
+  if (content.status !== 'ready') return <SplitLayout section="journal"><ContentStatus entry/></SplitLayout>;
+  const post = content.posts.find(item => item.slug === slug);
+  if (!post) return <NotFound/>;
+
   const isAdvice = post.kind === 'advice';
-  const series = isAdvice ? advice : journey;
-  const position = series.findIndex(p=>p.slug===post.slug);
-  const earlier = series[position+1], later = series[position-1];
-  const entryNumber = String(series.length - position).padStart(2,'0');
-  const crossover = (isAdvice ? journey : advice).slice(0,2);
+  const series = isAdvice ? content.advice : content.journey;
+  const position = series.findIndex(item => item.slug === post.slug);
+  const earlier = series[position + 1];
+  const later = series[position - 1];
+  const entryNumber = String(post.sequence ?? series.length - position).padStart(2, '0');
+  const crossover = (isAdvice ? content.journey : content.advice).slice(0, 2);
   const back = isAdvice ? '/training' : '/journal';
   const canShare = typeof navigator.share === 'function';
+
   async function shareLink() {
-    if(canShare) {
-      try { await navigator.share({title:post!.title, url:window.location.href}); return; }
-      catch(error) { if((error as DOMException).name === 'AbortError') return; }
+    if (canShare) {
+      try { await navigator.share({ title: post!.title, url: window.location.href }); return; }
+      catch (error) { if ((error as DOMException).name === 'AbortError') return; }
     }
-    try { await navigator.clipboard.writeText(window.location.href); setCopyState('copied'); } catch { setCopyState('failed'); }
+    try { await navigator.clipboard.writeText(window.location.href); setCopyState('copied'); }
+    catch { setCopyState('failed'); }
   }
+
   return <div className="reading reading-split">
     <ReadingProgress/>
     <header className="reading-header">
@@ -97,7 +115,7 @@ function Article() {
           <span><time dateTime={post.date}>{formatDate(post.date)}</time> · {post.readTime} min read</span>
         </div>
         <h1>{post.title}</h1>
-        <p className="reading-deck">{post.excerpt}</p>
+        {post.excerpt && <p className="reading-deck">{post.excerpt}</p>}
         <div className="reading-author">
           <span>By Luke Edwards · Certified personal trainer</span>
           <button type="button" onClick={shareLink}>
@@ -105,56 +123,46 @@ function Article() {
             <span aria-live="polite">{copyState === 'copied' ? 'Link copied' : copyState === 'failed' ? 'Copy unavailable' : canShare ? 'Share' : 'Copy link'}</span>
           </button>
         </div>
-        <div className="reading-sample">Sample {isAdvice ? 'training article' : 'journal entry'}. {isAdvice ? 'Illustrative advice, supplied as an example.' : 'This is illustrative writing, not a record of Luke’s training.'}</div>
-        <figure className="reading-image">
-          <img src={post.image} alt={post.image.includes('athlete') ? 'Stock athlete training on a pull-up bar' : 'Stock photograph of gym training and equipment'}/>
-          <figcaption>Stock photography · People pictured are not Luke.</figcaption>
-        </figure>
-        <div className="reading-text">
-          {post.body.map((part, i) => <section key={part.heading}>
-            <h2>{part.heading}</h2>
-            <p>{part.text}</p>
-            {post.workout && i === 1 && <div className="reading-workout">
-              <div className="reading-workout-head">
-                <h3>{post.workoutTitle ?? 'Sample session'}</h3>
-                <span>{post.workout.length} exercises · {post.workout.reduce((total, row) => total + Number(row.sets), 0)} working sets</span>
-              </div>
-              <div className="workout-table-wrap">
-                <table>
-                  <thead><tr><th scope="col">Exercise</th><th scope="col">Sets</th><th scope="col">Reps</th></tr></thead>
-                  <tbody>{post.workout.map((row, n) => <tr key={row.exercise}>
-                    <th scope="row"><span aria-hidden="true">{String(n + 1).padStart(2, '0')}</span>{row.exercise}</th>
-                    <td>{row.sets}</td><td>{row.reps}</td>
-                  </tr>)}</tbody>
-                </table>
-              </div>
-              <p>Adjust this example to your experience, equipment, and available time.</p>
-            </div>}
-          </section>)}
-        </div>
+        {post.sample && <div className="reading-sample">Sample {isAdvice ? 'training article' : 'journal entry'}. This is illustrative writing.</div>}
+        {post.markdown.trim() && <div className="reading-text reading-markdown">
+          <ReactMarkdown remarkPlugins={[remarkGfm]} skipHtml components={{
+            h1: ({ children }) => <h2>{children}</h2>,
+            img: ({ src, alt }) => <img src={src} alt={alt ?? ''} loading="lazy" decoding="async"/>,
+            table: ({ children }) => <div className="workout-table-wrap"><table>{children}</table></div>,
+          }}>{post.markdown}</ReactMarkdown>
+        </div>}
+        {post.media.length > 0 && <div className="reading-gallery" aria-label="Entry photos and videos">
+          {post.media.map((media, index) => <figure key={`${media.path}-${index}`}>
+            {media.type === 'image'
+              ? <img src={media.path} alt={media.alt} loading="lazy" decoding="async"/>
+              : <video src={media.path} controls preload="metadata" playsInline aria-label={media.alt}>
+                <a href={media.path}>Download the video</a>
+              </video>}
+            {media.alt && <figcaption>{media.alt}</figcaption>}
+          </figure>)}
+        </div>}
         {(earlier || later) && <nav className="reading-pager" aria-label={isAdvice ? 'More articles' : 'More journal entries'}>
-          {earlier ? <Link to={`/post/${earlier.slug}`} className="reading-pager-earlier">
+          {earlier ? <Link to={`/post/${encodeURIComponent(earlier.slug)}`} className="reading-pager-earlier">
             <span><ChevronLeft size={14}/> {isAdvice ? 'Previous article' : 'Earlier entry'}</span>
             <strong>{earlier.title}</strong>
           </Link> : <span/>}
-          {later && <Link to={`/post/${later.slug}`} className="reading-pager-later">
+          {later && <Link to={`/post/${encodeURIComponent(later.slug)}`} className="reading-pager-later">
             <span>{isAdvice ? 'Next article' : 'Later entry'} <Arrow width="14" height="14"/></span>
             <strong>{later.title}</strong>
           </Link>}
         </nav>}
       </article>
-      <section className="reading-related" aria-labelledby="reading-related-title">
+      {crossover.length > 0 && <section className="reading-related" aria-labelledby="reading-related-title">
         <h2 id="reading-related-title">{isAdvice ? 'Meanwhile, in the journal.' : 'From the training library.'}</h2>
-        <div>{crossover.map(p => <Link key={p.slug} to={`/post/${p.slug}`}>
-          <span>{p.category} · {p.readTime} min</span>
-          <h3>{p.title}</h3>
+        <div>{crossover.map(item => <Link key={item.slug} to={`/post/${encodeURIComponent(item.slug)}`}>
+          <span>{item.category} · {item.readTime} min</span>
+          <h3>{item.title}</h3>
         </Link>)}</div>
-      </section>
+      </section>}
     </main>
-    <footer className="reading-footer"><span>Luke Edwards Fitness</span><span>Sample posts · Stock photography</span></footer>
+    <footer className="reading-footer"><span>Luke Edwards Fitness</span><span>{post.sample ? 'Sample writing' : 'Training & journal'}</span></footer>
   </div>;
 }
-
 
 function NotFound() {
   return <main id="main-content" className="not-found">

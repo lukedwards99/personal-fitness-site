@@ -8,32 +8,37 @@
     "node": "24.15.x"
   },
   "scripts": {
-    "dev": "npm run db:setup && vite",
+    "dev": "npm run content:local && vite",
     "dev:server": "vite",
     "dev:tailnet": "node scripts/tailnet-preview.mjs",
-    "db:migrate": "wrangler d1 migrations apply DB --local",
-    "db:seed": "tsx scripts/seed-local.ts",
-    "db:seed:dev": "node --import tsx scripts/seed-remote.ts dev",
-    "db:seed:main": "node --import tsx scripts/seed-remote.ts main",
-    "db:setup": "npm run db:migrate && npm run db:seed",
     "typecheck": "tsc --noEmit",
     "build": "vite build",
     "build:dev": "npm run typecheck && CLOUDFLARE_ENV=dev vite build",
     "build:main": "npm run typecheck && CLOUDFLARE_ENV=production vite build",
     "deploy:dev": "node scripts/deploy-lane.mjs dev",
     "deploy:main": "node scripts/deploy-lane.mjs main",
-    "check": "npm run typecheck && npm run build",
+    "check": "npm run content:guard && npm run typecheck && npm test && npm run build",
     "check:api": "node scripts/check-api.mjs",
     "preview": "vite preview --host 127.0.0.1 --port 5178 --strictPort",
-    "lane:names": "node scripts/lane-names.mjs"
+    "lane:names": "node scripts/lane-names.mjs",
+    "content:guard": "node scripts/check-content-boundary.mjs",
+    "content:import": "node scripts/content/import-bde.mjs",
+    "content:build": "node scripts/content/build.mjs",
+    "content:publish": "node scripts/content/publish.mjs",
+    "content:backup": "node scripts/content/backup.mjs",
+    "content:local": "node scripts/content/local.mjs",
+    "test": "node --import tsx --test tests/*.test.ts scripts/content/*.test.mjs"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1152.0",
     "@fontsource-variable/inter-tight": "^5.3.0",
     "hono": "^4.13.3",
     "lucide-react": "^0.468.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^7.18.4"
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.18.4",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.53.1",
