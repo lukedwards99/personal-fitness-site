@@ -29,7 +29,7 @@ The Worker serves read-only archive, detail, health, and media endpoints. Media 
 Use original writing and properly sourced assets. Identify authentic journal entries accurately. Label sample writing and stock media only when those flags apply; do not present samples as Luke's actual progress or photos.
 
 ## Evidence on Hand
-Luke's name and certified personal trainer status are confirmed. His existing BDE journal has been imported locally: 214 entries and 1,830 media files, retaining all 1,831 ordered references, complete Markdown, dates, sequence, and source metadata. The original repository is untouched. No training articles are included initially. Local R2 is hydrated; hosted content publication awaits approved credentials and is not yet confirmed.
+Luke's name and certified personal trainer status are confirmed. His existing BDE journal has been imported: 214 entries and 1,830 media files, retaining all 1,831 ordered references, complete Markdown, dates, sequence, and source metadata. The original repository is untouched. No training articles are included initially. Local R2 is hydrated and the same release is published and verified in both dedicated hosted buckets. A complete dev backup was downloaded and checksum-verified into the external local library on October 17, 2026.
 
 ## Product Principles
 - Equal space for useful advice and the personal journey.

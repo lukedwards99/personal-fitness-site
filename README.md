@@ -56,7 +56,7 @@ Each post has JSON metadata and a sibling Markdown file. Metadata supplies its s
 
 The BDE importer preserves the complete Markdown, original dates and entry sequence, and every ordered photo/video reference. It copies the original blog JSON and Markdown into `source/bde-web/` and records source paths, checksums, and normalized destinations in the import manifest. The original BDE repository remains untouched. Identical imports are safe to repeat; differing existing files cause a collision error instead of being overwritten.
 
-The initial local import contains 214 authentic journal entries and 1,830 media files, with all 1,831 ordered media references retained. There are no training articles initially. The catalog has been built and loaded into local R2. Remote publication awaits approved R2 credentials; no hosted content upload is confirmed yet.
+The initial import contains 214 authentic journal entries and 1,830 media files, with all 1,831 ordered media references retained. There are no training articles initially. The catalog is loaded into local R2 and published to both dedicated hosted buckets. Every release object was verified in both lanes, and a complete dev backup was downloaded and checksum-verified in the external local library on October 17, 2026.
 
 ## Publish and back up content
 
