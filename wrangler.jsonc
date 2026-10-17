@@ -1,0 +1,58 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "personal-fitness-local",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-09-30",
+  "workers_dev": false,
+  "preview_urls": false,
+  "assets": {
+    "not_found_handling": "single-page-application",
+    "run_worker_first": [
+      "/api/*"
+    ]
+  },
+  "vars": {
+    "APP_ENV": "local"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "personal-fitness-local",
+      "database_id": "00000000-0000-0000-0000-000000000001",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "env": {
+    "dev": {
+      "name": "personal-fitness-dev",
+      "workers_dev": true,
+      "vars": {
+        "APP_ENV": "dev"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "personal-fitness-dev",
+          "database_id": "a8fef38f-a3da-4a8f-ae9c-97cbc8f2b07c",
+          "migrations_dir": "migrations"
+        }
+      ]
+    },
+    "production": {
+      "name": "personal-fitness-production",
+      "workers_dev": true,
+      "vars": {
+        "APP_ENV": "production"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "personal-fitness-production",
+          "database_id": "3d993b35-0aaa-49e7-b6ee-ce85aa099371",
+          "migrations_dir": "migrations"
+        }
+      ]
+    }
+  },
+  "account_id": "ddb45a91c623b716978d580d88298be1"
+}
