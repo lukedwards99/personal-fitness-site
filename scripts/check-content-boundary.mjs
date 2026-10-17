@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
 const files = [...new Set(execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '-z'], { cwd: root, encoding: 'utf8' }).split('\0').filter(Boolean))]
-const authored = /(^|\/)(?:posts|entries|articles|journal|blogs|blog-media|content-backups|\.content|\.local-content)(\/|$)|^content\//
+const authored = /(^|\/)(?:posts|entries|articles|journal|blogs|blog-media|content-backups|\.content|\.local-content|\.studio)(\/|$)|^content\//
 const forbidden = files.filter(file => {
   const path = resolve(root, file)
   if (!existsSync(path)) return false

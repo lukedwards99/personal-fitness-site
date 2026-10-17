@@ -60,6 +60,8 @@ The initial import contains 214 authentic journal entries and 1,830 media files,
 
 ## Publish and back up content
 
+For a local browser interface, run `npm run content:studio` and open the launch link printed in the terminal. Create or edit journal entries and training articles, upload ordered photos and videos, preview Markdown, and save to the external content library. Choose a lane explicitly when publishing the saved library or making a verified backup. The studio uses the existing local R2 credentials, keeps them server-side, and listens only on `127.0.0.1`. Its UI is not included in the public website. See [the content studio guide](docs/content-studio.md) for the full workflow.
+
 Author or edit the JSON and Markdown in the external workspace, then publish deliberately to each lane:
 
 ```sh
