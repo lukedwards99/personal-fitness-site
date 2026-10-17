@@ -64,9 +64,9 @@ async function main() {
   }
 
   if (!await isOurApp(target)) {
-    const setup = spawnSync('npm', ['run', 'db:setup'], { stdio: 'inherit' })
+    const setup = spawnSync('npm', ['run', 'content:local'], { stdio: 'inherit' })
     if (setup.error) throw setup.error
-    if (setup.status !== 0) throw new Error('Local sample database setup failed.')
+    if (setup.status !== 0) throw new Error('Local R2 content setup failed.')
     start(process.execPath, ['node_modules/vite/bin/vite.js', '--host', '127.0.0.1', '--port', String(port), '--strictPort'], 'Local server')
     if (!await waitFor(() => isOurApp(target), 60000)) throw new Error(`The local application did not become ready at ${target}.`)
   } else {

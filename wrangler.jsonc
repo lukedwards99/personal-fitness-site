@@ -14,14 +14,6 @@
   "vars": {
     "APP_ENV": "local"
   },
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "personal-fitness-local",
-      "database_id": "00000000-0000-0000-0000-000000000001",
-      "migrations_dir": "migrations"
-    }
-  ],
   "env": {
     "dev": {
       "name": "personal-fitness-dev",
@@ -29,12 +21,10 @@
       "vars": {
         "APP_ENV": "dev"
       },
-      "d1_databases": [
+      "r2_buckets": [
         {
-          "binding": "DB",
-          "database_name": "personal-fitness-dev",
-          "database_id": "a8fef38f-a3da-4a8f-ae9c-97cbc8f2b07c",
-          "migrations_dir": "migrations"
+          "binding": "CONTENT",
+          "bucket_name": "personal-fitness-content-dev"
         }
       ]
     },
@@ -44,15 +34,19 @@
       "vars": {
         "APP_ENV": "production"
       },
-      "d1_databases": [
+      "r2_buckets": [
         {
-          "binding": "DB",
-          "database_name": "personal-fitness-production",
-          "database_id": "3d993b35-0aaa-49e7-b6ee-ce85aa099371",
-          "migrations_dir": "migrations"
+          "binding": "CONTENT",
+          "bucket_name": "personal-fitness-content-production"
         }
       ]
     }
   },
-  "account_id": "ddb45a91c623b716978d580d88298be1"
+  "account_id": "ddb45a91c623b716978d580d88298be1",
+  "r2_buckets": [
+    {
+      "binding": "CONTENT",
+      "bucket_name": "personal-fitness-content-local"
+    }
+  ]
 }
