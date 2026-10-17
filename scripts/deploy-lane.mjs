@@ -15,6 +15,11 @@ if (process.argv.length !== 3 || !Object.hasOwn(lanes, lane)) {
 } else {
   const root = fileURLToPath(new URL('../', import.meta.url))
   const { environment, name } = lanes[lane]
+  // Workers Builds may override Wrangler's configured Worker name. Reject a
+  // mismatched trigger before it can pair one lane's database with another Worker.
+  if (process.env.WRANGLER_CI_OVERRIDE_NAME && process.env.WRANGLER_CI_OVERRIDE_NAME !== name) {
+    throw new Error(`Workers Builds targets ${process.env.WRANGLER_CI_OVERRIDE_NAME}, but the ${lane} lane targets ${name}.`)
+  }
   const env = { ...process.env, CLOUDFLARE_ENV: environment }
   const run = (entry, args, commandEnv = env) => {
     const result = spawnSync(process.execPath, [resolve(root, entry), ...args], { cwd: root, env: commandEnv, stdio: 'inherit' })

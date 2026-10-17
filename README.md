@@ -64,6 +64,16 @@ Deployment selects the Cloudflare environment at build time, checks the generate
 
 The repository is [lukedwards99/personal-fitness-site](https://github.com/lukedwards99/personal-fitness-site). Develop on `dev`; merge reviewed changes into `main` for production. Keep credentials out of Git; local Wrangler authentication supplies manual deployment access.
 
+Cloudflare Workers Builds deploys on pushes to the matching branch. Each Worker has its own Git trigger and project-named build token; preview branch builds are disabled so other branches cannot deploy either lane. The build image uses `NODE_VERSION=24.15.0`, the repository root `/`, and an empty build command because the deploy script performs both build and deployment:
+
+| Worker | Tracked branch | Deploy command |
+| --- | --- | --- |
+| `personal-fitness-dev` | `dev` | `npm run deploy:dev` |
+| `personal-fitness-production` | `main` | `npm run deploy:main` |
+
+The deploy script rejects a Cloudflare CI Worker-name override that does not match the requested lane. Build credentials stay in Cloudflare, outside the repository. Cloudflare's generated token permissions cover the account; the project-specific Worker and D1 bindings provide deployment and data separation.
+
+
 | Lane | URL |
 | --- | --- |
 | Development | https://personal-fitness-dev.luke-edwards20.workers.dev |
