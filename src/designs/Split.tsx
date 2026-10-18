@@ -1,11 +1,13 @@
 import { useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useSearchParams } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { formatDate } from '../content';
 import type { Post } from '../content';
 import { useContent } from '../content-provider';
 import { Arrow } from '../components/Icons';
+import JournalTimeline from '../components/JournalTimeline';
+import { filterJournalPosts, getJournalPhotoGroups, getJournalYears } from '../journal';
 import './split.css';
 
 const url = (post: Post) => `/post/${encodeURIComponent(post.slug)}`;
@@ -125,16 +127,38 @@ function Training({ posts }: { posts: Post[] }) {
 }
 
 function Journal({ posts }: { posts: Post[] }) {
-  const [query, setQuery] = useState('');
+  const [params, setParams] = useSearchParams();
+  const query = params.get('q') ?? '';
+  const photos = params.get('view') === 'photos';
+  const years = useMemo(() => getJournalYears(posts), [posts]);
+  const year = years.includes(params.get('year') ?? '') ? params.get('year')! : 'all';
   const input = useRef<HTMLInputElement>(null);
-  const index = useMemo(() => posts.map(post => ({ post, text: [post.title, post.excerpt, post.category, post.markdown].join(' ').toLocaleLowerCase('en-US') })), [posts]);
+  const entries = useMemo(() => filterJournalPosts(posts, { year, query }), [posts, year, query]);
+  const groups = useMemo(() => getJournalPhotoGroups(entries), [entries]);
+  const photoCount = groups.reduce((total, group) => total + group.photos.length, 0);
   const search = query.trim();
-  const terms = search.toLocaleLowerCase('en-US').split(/\s+/).filter(Boolean);
-  const entries = terms.length ? index.filter(item => terms.every(term => item.text.includes(term))).map(item => item.post) : posts;
-  const status = !terms.length ? `${count(posts.length, 'entry', 'entries')}, newest first.`
-    : entries.length ? `${count(entries.length, 'entry', 'entries')} of ${posts.length} match “${search}”.`
-    : `No entries match “${search}”.`;
-  const reset = () => { setQuery(''); input.current?.focus(); };
+  const scope = year === 'all' ? '' : ` in ${year}`;
+  const matches = search ? ` matching “${search}”` : '';
+  const status = photos
+    ? `${count(photoCount, 'photo')} across ${count(groups.length, 'entry', 'entries')}${scope}${matches}, newest first.`
+    : `${count(entries.length, 'entry', 'entries')}${scope}${matches}, newest first.`;
+
+  function update(key: string, value: string) {
+    setParams(current => {
+      const next = new URLSearchParams(current);
+      if (value) next.set(key, value); else next.delete(key);
+      return next;
+    }, { replace: true });
+  }
+  const clearSearch = () => { update('q', ''); input.current?.focus(); };
+  const reset = () => {
+    setParams(current => {
+      const next = new URLSearchParams(current);
+      next.delete('q'); next.delete('year');
+      return next;
+    }, { replace: true });
+    input.current?.focus();
+  };
 
   if (!posts.length) return <div className="sp-empty">
     <h2>The first entry is still to come.</h2>
@@ -142,21 +166,36 @@ function Journal({ posts }: { posts: Post[] }) {
   </div>;
 
   return <>
+    <div className="sp-journal-controls">
+      <div className="sp-filter sp-journal-views" role="group" aria-label="Journal view">
+        <button type="button" aria-pressed={!photos} onClick={() => update('view', '')}>Entries</button>
+        <button type="button" aria-pressed={photos} onClick={() => update('view', 'photos')}>Photos</button>
+      </div>
+      <div className="sp-journal-year">
+        <label htmlFor="sp-journal-year">Year</label>
+        <select id="sp-journal-year" value={year} onChange={event => update('year', event.target.value === 'all' ? '' : event.target.value)}>
+          <option value="all">All years</option>
+          {years.map(item => <option key={item} value={item}>{item}</option>)}
+        </select>
+      </div>
+    </div>
     <div className="sp-search" role="search">
       <label htmlFor="sp-search-input">Search the journal</label>
       <div className="sp-search-field">
         <input id="sp-search-input" ref={input} type="search" value={query} placeholder="Titles, summaries, full entries" autoComplete="off" enterKeyHint="search" aria-describedby="sp-search-status"
-          onChange={event => setQuery(event.target.value)} onKeyDown={event => { if (event.key === 'Escape' && query) { event.preventDefault(); setQuery(''); } }}/>
-        {query && <button type="button" className="sp-search-clear" aria-label="Clear search" onClick={reset}><X size={20} strokeWidth={1.5} aria-hidden="true"/></button>}
+          onChange={event => update('q', event.target.value)} onKeyDown={event => { if (event.key === 'Escape' && query) { event.preventDefault(); update('q', ''); } }}/>
+        {query && <button type="button" className="sp-search-clear" aria-label="Clear search" onClick={clearSearch}><X size={20} strokeWidth={1.5} aria-hidden="true"/></button>}
       </div>
       <p className="sp-search-status" id="sp-search-status" aria-live="polite" aria-atomic="true">{status}</p>
     </div>
-    {entries.length > 0 ? <ol className="sp-list" aria-label="Journal entries">
+    {photos && groups.length > 0 ? <JournalTimeline groups={groups}/> : !photos && entries.length > 0 ? <ol className="sp-list" aria-label="Journal entries">
       {entries.map(post => <Row key={post.slug} post={post} meta={<time dateTime={post.date}>{formatDate(post.date)}</time>} aside={`${post.readTime} min`} preview/>)}
     </ol> : <div className="sp-empty">
-      <h2>Try a broader word.</h2>
-      <p>Search looks through every title, summary and full entry. Try a single word or a different phrase.</p>
-      <button type="button" onClick={reset}>Show all entries <Arrow strokeWidth={1.4}/></button>
+      <h2>{photos ? 'No photos to show.' : 'No entries found.'}</h2>
+      <p>{photos && entries.length > 0 ? 'These entries have no photos. You can read the entries or choose another year.'
+        : 'Try another year or a broader search. Search looks through every title, summary and full entry.'}</p>
+      {(search || year !== 'all') && <button type="button" onClick={reset}>Clear filters <Arrow strokeWidth={1.4}/></button>}
+      {photos && <button type="button" onClick={() => update('view', '')}>Browse entries <Arrow strokeWidth={1.4}/></button>}
     </div>}
   </>;
 }

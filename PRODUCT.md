@@ -22,7 +22,7 @@ Code uses the project's isolated Cloudflare lanes: `dev` deploys `personal-fitne
 Content publication is explicit and separate from Git: author outside the repository, build and validate, publish to dev, preview, then publish to main. Keep the local authoring copy and verified remote snapshots. Local development hydrates R2 emulation from the external workspace; Tailscale Serve remains available for private previews.
 
 ## Capabilities and Constraints
-Advice library with category filters, Markdown workout tables, chronological journal with full-text search, individual article links, complete ordered image/video galleries, and responsive layouts. Canonical routes are `/`, `/training`, `/journal`, and `/post/:slug`; legacy `/split` links redirect to the matching canonical route. Retired design routes show the normal not-found page.
+Advice library with category filters, Markdown workout tables, newest-first journal Entries/Photos views with shared URL-backed year and full-text search filters, a complete vertical photo timeline with lazy-loaded full frames and full-size links, individual article links, complete ordered image/video galleries, and responsive layouts. Canonical routes are `/`, `/training`, `/journal`, and `/post/:slug`; legacy `/split` links redirect to the matching canonical route. Retired design routes show the normal not-found page.
 
 The Worker serves read-only archive, detail, health, and media endpoints. Media use content-addressed paths and immutable caching; videos support byte ranges. Publishing uploads and verifies media and a versioned catalog before atomically changing the current pointer. Backups preserve authoring files and previous snapshots; publishing and backup tools do not delete remote objects.
 
