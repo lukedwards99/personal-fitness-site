@@ -396,6 +396,28 @@ html:has(.split.sp-dark),html:has(.split.sp-dark) body,html:has(.reading-split .
   grid-area: body;
 }
 
+.sp-row-with-preview {
+  grid-template-columns: 88px minmax(0,1fr) auto;
+  grid-template-areas: "preview meta aside" "preview body body";
+}
+
+.sp-row-with-preview .sp-row-aside {
+  white-space: nowrap;
+}
+
+.sp-row-preview {
+  grid-area: preview;
+  align-self: start;
+  background: var(--sp-rule);
+}
+
+.sp-row-preview img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4/5;
+  object-fit: cover;
+}
+
 .sp-row-title {
   font-size: 22px;
   font-weight: 600;
@@ -609,6 +631,11 @@ html:has(.split.sp-dark),html:has(.split.sp-dark) body,html:has(.reading-split .
   }
   .sp-row-meta,.sp-row-aside {
     font-size: 14px;
+  }
+  .sp-row-with-preview {
+    grid-template-columns: 160px 160px minmax(0,1fr) auto;
+    grid-template-areas: "meta preview body aside";
+    align-items: start;
   }
   .sp-row-aside {
     justify-self: end;
@@ -1094,6 +1121,96 @@ html:has(.split.sp-dark),html:has(.split.sp-dark) body,html:has(.reading-split .
   line-height: 1.5;
 }
 
+/* One full frame at a time, with native touch and trackpad scrolling. */
+.journal-gallery {
+  margin-top: 40px;
+}
+
+.journal-gallery-viewport {
+  display: flex;
+  align-items: start;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.journal-gallery-viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.journal-gallery-viewport:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 4px;
+}
+
+.journal-gallery-slide {
+  flex: 0 0 100%;
+  min-width: 0;
+  scroll-snap-align: start;
+}
+
+.journal-gallery-frame {
+  height: clamp(240px,65svh,700px);
+  background: var(--soft);
+  border: 1px solid var(--rule);
+}
+
+.journal-gallery-frame img,
+.journal-gallery-frame video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.journal-gallery-slide figcaption {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.journal-gallery-controls,
+.journal-gallery-controls > div {
+  display: flex;
+  align-items: center;
+}
+
+.journal-gallery-controls {
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.journal-gallery-position {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.journal-gallery-controls > div {
+  gap: 8px;
+}
+
+.journal-gallery-controls button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--rule);
+  background: transparent;
+  color: var(--ink);
+}
+
+.journal-gallery-controls button:hover:enabled {
+  background: var(--soft);
+  border-color: var(--ink);
+}
+
 @media(max-width:700px) {
   .reading-gallery {
     grid-template-columns: 1fr;
@@ -1105,6 +1222,30 @@ html:has(.split.sp-dark),html:has(.split.sp-dark) body,html:has(.reading-split .
 }
 
 @media print {
+  .journal-gallery-viewport {
+    display: block;
+    overflow: visible;
+  }
+
+  .journal-gallery-slide {
+    margin-bottom: 24px;
+    break-inside: avoid;
+  }
+
+  .journal-gallery-frame {
+    height: auto;
+  }
+
+  .journal-gallery-frame img,
+  .journal-gallery-frame video {
+    height: auto;
+    max-height: 760px;
+  }
+
+  .journal-gallery-controls {
+    display: none;
+  }
+
   .reading-gallery {
     display: block;
   }
