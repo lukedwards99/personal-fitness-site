@@ -12,6 +12,8 @@ Canonical routes are `/`, `/training`, `/journal`, and `/post/:slug`. Training p
 
 Complete Markdown supports GitHub Flavored Markdown, including headings, lists, links, and workout tables. Preserve authentic journal text and every associated photo/video reference. Render media from the content API; videos retain playback controls and seeking. Writing and media come from the external R2 catalog, with no article bodies or personal media bundled into application code.
 
+Journal overview rows preview the first photo in each entry, even when a video comes before it. Entries without photos retain their text layout. Journal entry galleries show one full photo or video at a time in the original order, with native horizontal swiping, previous/next controls, a position counter, and keyboard navigation. Keep complete frames visible, pause videos when their slide leaves view, respect reduced motion, and show every slide when printing.
+
 Legacy `/split`, `/split/training`, `/split/journal`, and `/split/post/:slug` links redirect to the corresponding canonical paths. Retired design routes use the normal not-found page. The site has no design gallery or comparison switcher.
 
 ## Craft and integrity

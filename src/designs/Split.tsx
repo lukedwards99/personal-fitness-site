@@ -73,8 +73,10 @@ function Home() {
   </div>;
 }
 
-function Row({ post, meta, aside }: { post: Post; meta: ReactNode; aside: string }) {
-  return <li><Link className="sp-row" to={url(post)}>
+function Row({ post, meta, aside, preview = false }: { post: Post; meta: ReactNode; aside: string; preview?: boolean }) {
+  const cover = preview ? post.media.find(item => item.type === 'image') : undefined;
+  return <li><Link className={`sp-row${cover ? ' sp-row-with-preview' : ''}`} to={url(post)}>
+    {cover && <span className="sp-row-preview"><img src={cover.path} alt="" loading="lazy" decoding="async" width={160} height={200}/></span>}
     <span className="sp-row-meta">{meta}</span>
     <span className="sp-row-body"><h2 className="sp-row-title">{post.title}</h2>{post.excerpt && <p className="sp-row-excerpt">{post.excerpt}</p>}</span>
     <span className="sp-row-aside">{aside}</span>
@@ -150,7 +152,7 @@ function Journal({ posts }: { posts: Post[] }) {
       <p className="sp-search-status" id="sp-search-status" aria-live="polite" aria-atomic="true">{status}</p>
     </div>
     {entries.length > 0 ? <ol className="sp-list" aria-label="Journal entries">
-      {entries.map(post => <Row key={post.slug} post={post} meta={<time dateTime={post.date}>{formatDate(post.date)}</time>} aside={`${post.readTime} min`}/>)}
+      {entries.map(post => <Row key={post.slug} post={post} meta={<time dateTime={post.date}>{formatDate(post.date)}</time>} aside={`${post.readTime} min`} preview/>)}
     </ol> : <div className="sp-empty">
       <h2>Try a broader word.</h2>
       <p>Search looks through every title, summary and full entry. Try a single word or a different phrase.</p>
