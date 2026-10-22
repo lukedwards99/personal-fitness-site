@@ -20,7 +20,7 @@ The default workspace is `~/Documents/personal-fitness-content`. Set `FITNESS_CO
 
 - `/` — Training and Journal, side by side on desktop and stacked on phones.
 - `/training` — advice and workouts, filtered by category; initially empty until training articles are authored.
-- `/journal` — chronological entries with first-photo previews and full-text search.
+- `/journal` — chronological entries with first-photo previews, year selection and full-text search. Switch to Photos for a large, vertically scrolling timeline of every photo, grouped by entry, newest first. Year and search filters apply to both views and stay in the URL; photos open at full size in a new tab.
 - `/post/:slug` — individual training articles and journal entries. Journal photos and videos use a swipeable gallery with arrow buttons and keyboard navigation.
 
 Existing `/split`, `/split/training`, `/split/journal`, and `/split/post/:slug` links redirect to their canonical paths. Retired design routes use the site's normal not-found page.
