@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#161616">
+  <title>Content studio · Luke Edwards</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#editor-region">Skip to editor</a>
+  <div id="session-screen" class="session-screen" role="status">
+    <h1>Content studio</h1>
+    <p id="session-message">Opening your local library…</p>
+  </div>
+  <div id="app" hidden>
+    <header class="app-header">
+      <div class="app-brand"><strong>Luke Edwards</strong><span>Content studio</span><span id="connection-status" class="connection-status" role="status">Local session</span></div>
+      <div class="publish-actions">
+        <div class="lane-field"><label for="publish-lane">Publishing lane</label><select id="publish-lane"><option value="dev">Development (dev)</option><option value="main">Production (main)</option></select></div>
+        <button id="backup-button" class="button button-dark-secondary" type="button">Back up lane</button>
+        <button id="publish-button" class="button button-light" type="button" disabled>Publish library</button>
+      </div>
+    </header>
+    <div class="publish-note"><p id="publish-hint">Publish sends all saved writing to development.</p><p id="global-status" role="status" aria-live="polite"></p></div>
+    <section id="job-panel" class="job-panel" aria-labelledby="job-heading" hidden>
+      <div><h2 id="job-heading">Publication</h2><p id="job-message" role="status" aria-live="polite"></p><dl id="job-result"></dl></div>
+      <button id="check-job-button" class="button button-secondary" type="button" hidden>Check progress</button>
+    </section>
+    <div class="studio-layout">
+      <aside class="library" aria-labelledby="library-heading">
+        <div class="library-top"><h2 id="library-heading">Library</h2><span id="library-count" class="muted">Loading…</span></div>
+        <div class="new-actions"><button id="new-journal" class="button button-secondary" type="button">New journal entry</button><button id="new-article" class="button button-secondary" type="button">New article</button></div>
+        <form id="library-search-form" class="library-search" role="search">
+          <label for="library-query">Search writing</label><input id="library-query" type="search" placeholder="Title or summary" autocomplete="off">
+          <label for="library-kind">Show</label><select id="library-kind"><option value="all">All writing</option><option value="journey">Journal entries</option><option value="advice">Training articles</option></select>
+        </form>
+        <p id="library-empty" class="library-empty" hidden></p>
+        <ol id="library-list" class="library-list" aria-label="Saved writing"></ol>
+        <details class="library-details"><summary>Library & publishing details</summary><dl><dt>Local folder</dt><dd id="workspace-path"></dd><dt>Cloudflare access</dt><dd id="credentials-source"></dd><dt>Development bucket</dt><dd id="dev-bucket"></dd><dt>Production bucket</dt><dd id="main-bucket"></dd></dl></details>
+      </aside>
+      <main id="editor-region" class="editor" tabindex="-1">
+        <div class="editor-toolbar"><div><h1 id="editor-heading">Your writing</h1><p id="save-state" class="save-state" role="status">Choose an entry or start a new one.</p></div><div class="editor-actions"><button id="reload-button" class="button button-secondary" type="button" hidden>Reload saved</button><button id="save-button" class="button button-primary" type="submit" form="post-form" disabled>Save locally</button></div></div>
+        <div id="editor-alert" class="editor-alert" role="alert" hidden><p id="editor-error"></p><button id="download-draft" class="button button-secondary" type="button">Download draft</button></div>
+        <div class="editor-tabs" role="tablist" aria-label="Editor view"><button id="write-tab" type="button" role="tab" aria-selected="true" aria-controls="write-panel" tabindex="0">Write</button><button id="preview-tab" type="button" role="tab" aria-selected="false" aria-controls="preview-panel" tabindex="-1">Preview</button></div>
+        <section id="write-panel" role="tabpanel" aria-labelledby="write-tab">
+          <form id="post-form" novalidate>
+            <fieldset id="editor-fields" disabled>
+              <div class="field"><label for="post-title">Title</label><input id="post-title" name="title" type="text" maxlength="200" required autocomplete="off"></div>
+              <div class="field"><label for="post-slug">Web address slug</label><input id="post-slug" name="slug" type="text" pattern="[a-z0-9]+(-[a-z0-9]+)*" maxlength="128" required autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="slug-hint"><p id="slug-hint" class="field-hint">Created from the title. Use lowercase letters, numbers and hyphens.</p></div>
+              <div class="metadata-fields"><div class="field"><label for="post-kind">Section</label><select id="post-kind" name="kind"><option value="journey">Journal</option><option value="advice">Training</option></select></div><div class="field"><label for="post-date">Publication date</label><input id="post-date" name="date" type="date" required></div><div class="field"><label for="post-category">Category</label><input id="post-category" name="category" type="text" maxlength="80" required autocomplete="off"></div></div>
+              <div class="field"><label for="post-excerpt">Summary</label><textarea id="post-excerpt" name="excerpt" rows="3" maxlength="1200" required aria-describedby="excerpt-hint"></textarea><p id="excerpt-hint" class="field-hint">A short introduction for the library and journal listing.</p></div>
+              <div class="field body-field"><div class="field-heading"><label for="post-markdown">Body · Markdown</label><span id="read-time" class="field-hint">Reading time is calculated when you save.</span></div><textarea id="post-markdown" name="markdown" rows="18" required spellcheck="true" aria-describedby="markdown-hint"></textarea><p id="markdown-hint" class="field-hint">Use headings, lists, links and tables. Preview shows the formatted writing.</p><div class="markdown-import"><label for="markdown-file">Replace body from a file</label><input id="markdown-file" type="file" accept=".md,.txt,text/markdown,text/plain" aria-describedby="markdown-file-hint"><span id="markdown-file-hint" class="field-hint">Markdown or plain text, up to 2 MiB.</span></div></div>
+              <section class="media-section" aria-labelledby="media-heading"><div class="section-heading"><h2 id="media-heading">Photos & videos</h2><span id="media-count" class="muted">No media</span></div><label for="media-files">Add photos or videos</label><input id="media-files" type="file" accept=".jpg,.jpeg,.png,.webp,.gif,.avif,.mp4,.webm" multiple aria-describedby="upload-hint"><p id="upload-hint" class="field-hint">Up to 100 MiB per file. Files are added in selection order. Add alt text before saving.</p><p id="upload-status" role="status" aria-live="polite"></p><ol id="media-list" class="media-list" aria-label="Media in display order"></ol><p id="media-empty" class="media-empty">No photos or videos yet. Writing can be saved without media.</p></section>
+            </fieldset>
+          </form>
+          <p class="local-note">Saving keeps a local revision. Publishing is a separate step.</p>
+        </section>
+        <section id="preview-panel" role="tabpanel" aria-labelledby="preview-tab" hidden><div class="preview-toolbar"><p>Preview of the current draft</p><button id="refresh-preview" class="button button-secondary" type="button">Refresh preview</button></div><p id="preview-status" role="status" aria-live="polite"></p><article class="preview-article"><p id="preview-meta" class="muted"></p><h1 id="preview-title"></h1><p id="preview-excerpt" class="preview-excerpt"></p><div id="preview-body" class="markdown-preview"></div><div id="preview-media" class="preview-media"></div></article></section>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

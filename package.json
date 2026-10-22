@@ -27,7 +27,8 @@
     "content:publish": "node scripts/content/publish.mjs",
     "content:backup": "node scripts/content/backup.mjs",
     "content:local": "node scripts/content/local.mjs",
-    "test": "node --import tsx --test tests/*.test.ts scripts/content/*.test.mjs"
+    "content:studio": "node scripts/content/studio/server.mjs",
+    "test": "node --import tsx --test tests/*.test.ts scripts/content/*.test.mjs scripts/content/studio/*.test.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1152.0",

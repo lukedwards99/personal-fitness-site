@@ -7,6 +7,7 @@ import Split, { ContentStatus, SplitLayout } from './designs/Split';
 import { formatDate } from './content';
 import { useContent } from './content-provider';
 import { Arrow } from './components/Icons';
+import JournalGallery from './components/JournalGallery';
 
 function ScrollAndTitle() {
   const { pathname, hash } = useLocation();
@@ -131,7 +132,7 @@ function Article() {
             table: ({ children }) => <div className="workout-table-wrap"><table>{children}</table></div>,
           }}>{post.markdown}</ReactMarkdown>
         </div>}
-        {post.media.length > 0 && <div className="reading-gallery" aria-label="Entry photos and videos">
+        {post.media.length > 0 && (isAdvice ? <div className="reading-gallery" aria-label="Entry photos and videos">
           {post.media.map((media, index) => <figure key={`${media.path}-${index}`}>
             {media.type === 'image'
               ? <img src={media.path} alt={media.alt} loading="lazy" decoding="async"/>
@@ -140,7 +141,7 @@ function Article() {
               </video>}
             {media.alt && <figcaption>{media.alt}</figcaption>}
           </figure>)}
-        </div>}
+        </div> : <JournalGallery key={post.slug} media={post.media}/>)}
         {(earlier || later) && <nav className="reading-pager" aria-label={isAdvice ? 'More articles' : 'More journal entries'}>
           {earlier ? <Link to={`/post/${encodeURIComponent(earlier.slug)}`} className="reading-pager-earlier">
             <span><ChevronLeft size={14}/> {isAdvice ? 'Previous article' : 'Earlier entry'}</span>

@@ -20,8 +20,8 @@ The default workspace is `~/Documents/personal-fitness-content`. Set `FITNESS_CO
 
 - `/` — Training and Journal, side by side on desktop and stacked on phones.
 - `/training` — advice and workouts, filtered by category; initially empty until training articles are authored.
-- `/journal` — chronological entries with full-text search.
-- `/post/:slug` — individual training articles and journal entries.
+- `/journal` — chronological entries with first-photo previews, year selection and full-text search. Switch to Photos for a large, vertically scrolling timeline of every photo, grouped by entry, newest first. Year and search filters apply to both views and stay in the URL; photos open at full size in a new tab.
+- `/post/:slug` — individual training articles and journal entries. Journal photos and videos use a swipeable gallery with arrow buttons and keyboard navigation.
 
 Existing `/split`, `/split/training`, `/split/journal`, and `/split/post/:slug` links redirect to their canonical paths. Retired design routes use the site's normal not-found page.
 
@@ -59,6 +59,8 @@ The BDE importer preserves the complete Markdown, original dates and entry seque
 The initial import contains 214 authentic journal entries and 1,830 media files, with all 1,831 ordered media references retained. There are no training articles initially. The catalog is loaded into local R2 and published to both dedicated hosted buckets. Every release object was verified in both lanes, and a complete dev backup was downloaded and checksum-verified in the external local library on October 17, 2026.
 
 ## Publish and back up content
+
+For a local browser interface, run `npm run content:studio` and open the launch link printed in the terminal. Create or edit journal entries and training articles, upload ordered photos and videos, preview Markdown, and save to the external content library. Choose a lane explicitly when publishing the saved library or making a verified backup. The studio uses the existing local R2 credentials, keeps them server-side, and listens only on `127.0.0.1`. Its UI is not included in the public website. See [the content studio guide](docs/content-studio.md) for the full workflow.
 
 Author or edit the JSON and Markdown in the external workspace, then publish deliberately to each lane:
 
