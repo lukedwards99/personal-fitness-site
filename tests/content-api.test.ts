@@ -91,3 +91,15 @@ test('range parser rejects malformed and unsatisfiable requests', () => {
   assert.equal(parseRange('items=0-1', 32), undefined)
   assert.equal(parseRange('bytes=0-1,3-4', 32), undefined)
 })
+test('the public Worker exposes no studio sessions, publishing jobs, or authoring mutations', async () => {
+  const f = fixture()
+  for (const path of ['/api/session', '/api/library', '/api/jobs', '/api/preview']) {
+    assert.equal((await f.request(path)).status, 404)
+  }
+  for (const method of ['POST', 'PUT', 'PATCH', 'DELETE']) {
+    for (const path of ['/api/posts', '/api/posts/test-entry', `/api/${mediaKey}`, '/api/media', '/api/jobs', '/api/session']) {
+      assert.equal((await f.request(path, { method })).status, 404, `${method} ${path} must stay local to the studio`)
+    }
+  }
+  assert.equal((await json(f.request('/api/posts'))).total, 1)
+})
